@@ -1,0 +1,564 @@
+{
+  "pack": "mamba-cases-rules",
+  "version": "2026.10.19-1",
+  "published": "2026-10-19",
+  "disclaimer": {
+    "en": "Not legal advice. Rules change; always verify with the authority. The app never moves a deadline later for weekends or holidays.",
+    "sv": "Inte juridisk rådgivning. Regler ändras – kontrollera alltid med myndigheten. Appen flyttar aldrig en tidsfrist senare på grund av helger.",
+    "ar": "ليست استشارة قانونية. القواعد تتغير، فتحقّق دائماً من الجهة المختصة. لا يؤخّر التطبيق أي موعد بسبب العطل أو نهاية الأسبوع."
+  },
+  "ladders": {
+    "critical": [30, 14, 7, 3, 1, 0],
+    "high": [14, 7, 2, 0],
+    "normal": [7, 0],
+    "low": [0]
+  },
+  "agencies": [
+    { "code": "migrationsverket", "sv": "Migrationsverket", "en": "Swedish Migration Agency", "ar": "مصلحة الهجرة", "portal": "https://www.migrationsverket.se", "color": "#2563eb" },
+    { "code": "skatteverket", "sv": "Skatteverket", "en": "Swedish Tax Agency", "ar": "مصلحة الضرائب", "portal": "https://www.skatteverket.se", "color": "#0f766e" },
+    { "code": "forsakringskassan", "sv": "Försäkringskassan", "en": "Social Insurance Agency", "ar": "صندوق التأمينات الاجتماعية", "portal": "https://www.forsakringskassan.se", "color": "#16a34a" },
+    { "code": "arbetsformedlingen", "sv": "Arbetsförmedlingen", "en": "Public Employment Service", "ar": "مكتب العمل", "portal": "https://arbetsformedlingen.se", "color": "#9333ea" },
+    { "code": "csn", "sv": "CSN", "en": "CSN (student finance)", "ar": "سي إس إن (تمويل الدراسة)", "portal": "https://www.csn.se", "color": "#db2777" },
+    { "code": "bostadsformedlingen", "sv": "Bostadsförmedlingen", "en": "Housing queue (Bostadsförmedlingen)", "ar": "طابور السكن (بوستادسفورميدلينغن)", "portal": "https://bostad.stockholm.se", "color": "#ca8a04" },
+    { "code": "kronofogden", "sv": "Kronofogden", "en": "Enforcement Authority", "ar": "مصلحة التنفيذ (كرونوفوغدن)", "portal": "https://kronofogden.se", "color": "#dc2626" },
+    { "code": "transportstyrelsen", "sv": "Transportstyrelsen", "en": "Transport Agency (driving licence)", "ar": "هيئة النقل (رخصة القيادة)", "portal": "https://www.transportstyrelsen.se", "color": "#475569" },
+    { "code": "1177", "sv": "1177 / Region", "en": "1177 / Healthcare", "ar": "1177 / الرعاية الصحية", "portal": "https://www.1177.se", "color": "#0891b2" },
+    { "code": "kommun", "sv": "Kommunen", "en": "Municipality", "ar": "البلدية", "portal": "", "color": "#65a30d" },
+    { "code": "other", "sv": "Övrigt", "en": "Other", "ar": "أخرى", "portal": "", "color": "#6b7280" }
+  ],
+  "rules": [
+    {
+      "id": "migr.protection_extension",
+      "agency": "migrationsverket",
+      "name": { "en": "Extend a protection-based residence permit", "sv": "Förläng uppehållstillstånd (skydd/asyl, familj)", "ar": "تمديد تصريح الإقامة القائم على الحماية" },
+      "summary": {
+        "en": "Apply no earlier than 2 months before your permit ends (the e-service opens then) and before it expires. Families apply together.",
+        "sv": "Ansök tidigast två månader innan tillståndet slutar gälla (då öppnar e-tjänsten) och innan det går ut. Familjer ansöker samtidigt.",
+        "ar": "قدّم الطلب قبل انتهاء التصريح بشهرين على الأكثر (عندها تُفتح الخدمة الإلكترونية) وقبل انتهائه. تتقدّم الأسرة معاً."
+      },
+      "inputs": [
+        { "key": "permit_end", "type": "date", "required": true, "label": { "en": "Permit valid until (on your card)", "sv": "Tillståndet gäller t.o.m. (enligt kortet)", "ar": "التصريح صالح حتى (حسب البطاقة)" } },
+        { "key": "passport_expiry", "type": "date", "required": false, "label": { "en": "Passport expiry (family-member permits only)", "sv": "Passet gäller till (endast anhörigtillstånd)", "ar": "انتهاء جواز السفر (لتصاريح أفراد الأسرة فقط)" } }
+      ],
+      "deadlines": [
+        {
+          "key": "apply", "kind": "window", "severity": "critical",
+          "title": { "en": "Apply to extend residence permit", "sv": "Ansök om förlängt uppehållstillstånd", "ar": "تقديم طلب تمديد الإقامة" },
+          "opens": { "from": "permit_end", "months": -2 },
+          "due": { "from": "permit_end" },
+          "ladder": { "atOpen": true, "days": [45, 30, 14, 7, 1] }
+        }
+      ],
+      "checks": [
+        { "if": { "input": "passport_expiry", "before": { "from": "permit_end", "years": 2 } },
+          "level": "warn",
+          "text": { "en": "A family-member permit is never granted for longer than your passport is valid. Your passport ends before a typical 2-year extension would.", "sv": "Ett anhörigtillstånd beviljas aldrig längre än passet gäller. Ditt pass går ut före en typisk förlängning på två år.", "ar": "لا يُمنح تصريح فرد الأسرة لمدة أطول من صلاحية جواز السفر. جوازك ينتهي قبل نهاية تمديد نموذجي لمدة سنتين." } }
+      ],
+      "consequence": {
+        "en": "If you apply after the permit has expired you may not work while waiting, you risk losing benefits (e.g. etableringsstöd, studiebidrag, föräldrapenning) and the application may be refused.",
+        "sv": "Ansöker du efter att tillståndet gått ut får du inte arbeta under väntetiden, du riskerar att förlora förmåner (t.ex. etableringsstöd, studiebidrag, föräldrapenning) och ansökan kan avslås.",
+        "ar": "إذا قدّمت بعد انتهاء التصريح فلا يحق لك العمل أثناء الانتظار، وقد تفقد بعض المزايا (مثل دعم التأسيس ومنحة الدراسة وتعويض الوالدين)، وقد يُرفض الطلب."
+      },
+      "source_url": "https://www.migrationsverket.se/du-vill-forlanga/internationellt-skydd-asyl.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19",
+      "valid_from": "2026-06-12"
+    },
+    {
+      "id": "migr.protection_new_permit",
+      "agency": "migrationsverket",
+      "name": { "en": "New protection permit: expiry + renewal window (incl. subsidiary protection 3-year)", "sv": "Nytt skyddstillstånd: slutdatum + förlängningsfönster (inkl. subsidiärt skydd 3 år)", "ar": "تصريح حماية جديد: تاريخ الانتهاء ونافذة التمديد (يشمل الحماية الفرعية 3 سنوات)" },
+      "summary": {
+        "en": "Refugee status usually gives 3 years; subsidiary protection (formerly 'alternativt skyddsbehövande') usually 13 months; extensions are usually 2 or 3 years. Use the exact date on your card when you have it.",
+        "sv": "Flyktingstatus ger oftast 3 år, subsidiärt skyddsbehövande (tidigare alternativt) oftast 13 månader, förlängningar oftast 2 eller 3 år. Använd datumet på kortet när du har det.",
+        "ar": "صفة اللاجئ تمنح عادة 3 سنوات، والحماية الفرعية (سابقاً «البديلة») عادة 13 شهراً، والتمديد عادة سنتين أو 3 سنوات. استخدم التاريخ الدقيق على بطاقتك عندما يتوفر."
+      },
+      "inputs": [
+        { "key": "start", "type": "date", "required": true, "label": { "en": "Permit valid from", "sv": "Tillståndet gäller från", "ar": "التصريح صالح من" } },
+        { "key": "length", "type": "select", "required": true, "default": "subsidiary_ext_3y",
+          "options": [
+            { "value": "refugee_3y", "months": 36, "label": { "en": "Refugee – 3 years", "sv": "Flykting – 3 år", "ar": "لاجئ – 3 سنوات" } },
+            { "value": "subsidiary_13m", "months": 13, "label": { "en": "Subsidiary protection – first permit, 13 months", "sv": "Subsidiärt skydd – första tillstånd, 13 mån", "ar": "حماية فرعية – التصريح الأول، 13 شهراً" } },
+            { "value": "subsidiary_ext_3y", "months": 36, "label": { "en": "Subsidiary protection – 3-year permit (extension)", "sv": "Subsidiärt skydd – 3-årigt tillstånd (förlängning)", "ar": "حماية فرعية – تصريح لمدة 3 سنوات (تمديد)" } },
+            { "value": "ext_2y", "months": 24, "label": { "en": "Extension – 2 years", "sv": "Förlängning – 2 år", "ar": "تمديد – سنتان" } }
+          ],
+          "label": { "en": "Permit type / length", "sv": "Typ / längd", "ar": "النوع / المدة" } }
+      ],
+      "deadlines": [
+        {
+          "key": "expires", "kind": "absolute", "severity": "high",
+          "title": { "en": "Residence permit expires (estimate – check your card)", "sv": "Uppehållstillståndet går ut (uppskattning – kontrollera kortet)", "ar": "انتهاء تصريح الإقامة (تقدير – تحقّق من البطاقة)" },
+          "due": { "from": "start", "monthsFromInput": "length", "days": -1 },
+          "ladder": { "days": [90, 0] }
+        },
+        {
+          "key": "apply", "kind": "window", "severity": "critical",
+          "title": { "en": "Apply to extend residence permit", "sv": "Ansök om förlängt uppehållstillstånd", "ar": "تقديم طلب تمديد الإقامة" },
+          "opens": { "from": "start", "monthsFromInput": "length", "days": -1, "then": { "months": -2 } },
+          "due": { "from": "start", "monthsFromInput": "length", "days": -1 },
+          "ladder": { "atOpen": true, "days": [45, 30, 14, 7, 1] }
+        }
+      ],
+      "consequence": {
+        "en": "Applying after expiry: no right to work while waiting, possible loss of benefits and risk of refusal.",
+        "sv": "Ansökan efter att tillståndet gått ut: ingen rätt att arbeta under väntetiden, risk att förlora förmåner och risk för avslag.",
+        "ar": "التقديم بعد الانتهاء: لا يحق لك العمل أثناء الانتظار، واحتمال فقدان المزايا وخطر الرفض."
+      },
+      "source_url": "https://www.migrationsverket.se/du-har-fatt-beslut/internationellt-skydd-asyl/du-har-fatt-ja-pa-din-ansokan.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19",
+      "valid_from": "2026-06-12"
+    },
+    {
+      "id": "migr.work_permit_extension",
+      "agency": "migrationsverket",
+      "name": { "en": "Extend a work permit", "sv": "Förläng arbetstillstånd", "ar": "تمديد تصريح العمل" },
+      "summary": {
+        "en": "Apply at the earliest 2 months before the permit ends and before it ends. Your employer starts the application; you complete it.",
+        "sv": "Ansök tidigast två månader innan tillståndet slutar gälla och innan det går ut. Arbetsgivaren påbörjar ansökan, du kompletterar.",
+        "ar": "قدّم قبل انتهاء التصريح بشهرين على الأكثر وقبل انتهائه. يبدأ صاحب العمل الطلب وتكمله أنت."
+      },
+      "inputs": [
+        { "key": "permit_end", "type": "date", "required": true, "label": { "en": "Permit valid until", "sv": "Tillståndet gäller t.o.m.", "ar": "التصريح صالح حتى" } },
+        { "key": "permit_start", "type": "date", "required": false, "label": { "en": "Current permit valid from", "sv": "Nuvarande tillstånd gäller från", "ar": "التصريح الحالي صالح من" } }
+      ],
+      "deadlines": [
+        {
+          "key": "apply", "kind": "window", "severity": "critical",
+          "title": { "en": "Apply to extend work permit", "sv": "Ansök om förlängt arbetstillstånd", "ar": "تقديم طلب تمديد تصريح العمل" },
+          "opens": { "from": "permit_end", "months": -2 },
+          "due": { "from": "permit_end" },
+          "ladder": { "atOpen": true, "days": [30, 14, 7, 1] }
+        }
+      ],
+      "checks": [
+        { "if": { "input": "permit_start", "after": { "from": "permit_end", "months": -8 } },
+          "level": "warn",
+          "text": { "en": "You may keep working while waiting only if you have held the permit for at least 6 months and applied in time. When the window opens you will have held it for less than 6 months.", "sv": "Du får fortsätta arbeta under väntetiden endast om du haft tillståndet i minst sex månader och ansökt i tid. När fönstret öppnar har du haft det kortare än sex månader.", "ar": "يحق لك مواصلة العمل أثناء الانتظار فقط إذا حملت التصريح 6 أشهر على الأقل وقدّمت في الوقت المحدد. عند فتح النافذة ستكون قد حملته أقل من 6 أشهر." } }
+      ],
+      "consequence": {
+        "en": "If you apply late you lose the right to keep working while you wait for the decision.",
+        "sv": "Ansöker du för sent förlorar du rätten att fortsätta arbeta medan du väntar på beslut.",
+        "ar": "إذا تأخرت في التقديم تفقد حق مواصلة العمل أثناء انتظار القرار."
+      },
+      "source_url": "https://www.migrationsverket.se/du-vill-forlanga/arbeta/anstalld-eller-egen-foretagare/anstalld.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "af.activity_report",
+      "agency": "arbetsformedlingen",
+      "name": { "en": "Monthly activity report", "sv": "Aktivitetsrapport varje månad", "ar": "تقرير النشاط الشهري" },
+      "summary": {
+        "en": "Report the previous month's activities between the 1st and the 14th of every month. Keep your evidence for at least 3 months.",
+        "sv": "Rapportera förra månadens aktiviteter mellan den 1:a och 14:e varje månad. Spara underlag i minst tre månader.",
+        "ar": "أبلغ عن أنشطة الشهر السابق بين اليوم 1 و14 من كل شهر. احتفظ بالإثباتات 3 أشهر على الأقل."
+      },
+      "inputs": [],
+      "deadlines": [
+        {
+          "key": "report", "kind": "recurring", "severity": "high",
+          "title": { "en": "Activity report to Arbetsförmedlingen", "sv": "Aktivitetsrapport till Arbetsförmedlingen", "ar": "تقرير النشاط لمكتب العمل" },
+          "recurrence": { "freq": "monthly", "openDay": 1, "dueDay": 14 },
+          "ladder": { "atOpen": true, "days": [4, 1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Late or missing reports can lead to a warning or loss of compensation/activity support.",
+        "sv": "Sen eller utebliven rapport kan leda till varning eller att ersättningen dras in.",
+        "ar": "التأخر في التقرير أو عدم تقديمه قد يؤدي إلى إنذار أو فقدان التعويض/دعم النشاط."
+      },
+      "source_url": "https://arbetsformedlingen.se/for-arbetssokande/arbetslos---vad-hander-nu/aktivitetsrapportera",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "skv.flyttanmalan",
+      "agency": "skatteverket",
+      "name": { "en": "Report a move (flyttanmälan)", "sv": "Flyttanmälan", "ar": "الإبلاغ عن الانتقال (تغيير العنوان)" },
+      "summary": {
+        "en": "Report your new address before you move or within one week after moving.",
+        "sv": "Anmäl ny adress innan du flyttar eller senast en vecka efter flytten.",
+        "ar": "أبلغ عن عنوانك الجديد قبل الانتقال أو خلال أسبوع بعده."
+      },
+      "inputs": [
+        { "key": "move_date", "type": "date", "required": true, "label": { "en": "Moving date", "sv": "Flyttdatum", "ar": "تاريخ الانتقال" } }
+      ],
+      "deadlines": [
+        {
+          "key": "report", "kind": "absolute", "severity": "high",
+          "title": { "en": "Report move to Skatteverket", "sv": "Gör flyttanmälan till Skatteverket", "ar": "الإبلاغ عن الانتقال لمصلحة الضرائب" },
+          "due": { "from": "move_date", "days": 7 },
+          "ladder": { "days": [14, 7, 2, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "If you report later, the new address is registered only from the day your report arrives. Also update other agencies (Försäkringskassan within 14 days, CSN, bank, housing queue).",
+        "sv": "Anmäler du senare gäller den nya adressen först från den dag anmälan kommer in. Uppdatera även andra (Försäkringskassan inom 14 dagar, CSN, bank, bostadskö).",
+        "ar": "إذا أبلغت متأخراً فلن يُسجَّل العنوان الجديد إلا من يوم وصول البلاغ. حدّث أيضاً الجهات الأخرى (صندوق التأمينات خلال 14 يوماً، CSN، البنك، طابور السكن)."
+      },
+      "source_url": "https://www.skatteverket.se/flyttanmalan",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "skv.deklaration",
+      "agency": "skatteverket",
+      "name": { "en": "Income tax return (deklaration)", "sv": "Inkomstdeklaration", "ar": "التصريح الضريبي السنوي" },
+      "summary": {
+        "en": "Approve without changes by the end of March for a refund in April; the last day is in early May. Dates for 2026 are from Skatteverket; later years are estimates until Skatteverket publishes them.",
+        "sv": "Godkänn utan ändringar senast i slutet av mars för återbetalning i april; sista dag är i början av maj. 2026 års datum kommer från Skatteverket; senare år är uppskattningar tills Skatteverket publicerar dem.",
+        "ar": "وافق دون تعديل قبل نهاية مارس لتحصل على الاسترداد في أبريل؛ آخر موعد في أوائل مايو. تواريخ 2026 من مصلحة الضرائب، والسنوات اللاحقة تقديرية حتى تنشرها المصلحة."
+      },
+      "inputs": [
+        { "key": "year", "type": "year", "required": true, "default": "nextDeklarationYear", "label": { "en": "Year the return is filed", "sv": "År då deklarationen lämnas", "ar": "سنة تقديم التصريح" } }
+      ],
+      "deadlines": [
+        {
+          "key": "refund", "kind": "absolute", "severity": "normal",
+          "title": { "en": "Approve tax return for April refund", "sv": "Godkänn deklarationen för återbetalning i april", "ar": "الموافقة على التصريح لاسترداد أبريل" },
+          "due": { "byYear": { "2026": "2026-03-31" }, "fallback": { "month": 3, "day": 31, "shift": "prevBankDay" }, "yearInput": "year" },
+          "ladder": { "days": [14, 3, 0] }
+        },
+        {
+          "key": "last", "kind": "absolute", "severity": "critical",
+          "title": { "en": "Last day to file the tax return", "sv": "Sista dag att deklarera", "ar": "آخر يوم لتقديم التصريح الضريبي" },
+          "due": { "byYear": { "2026": "2026-05-04" }, "fallback": { "month": 5, "day": 2, "shift": "prevBankDay" }, "yearInput": "year" },
+          "ladder": { "days": [30, 14, 7, 3, 1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Filing late gives a late-filing fee (förseningsavgift). With anstånd (extension) the 2026 last day was 1 June.",
+        "sv": "Deklarerar du för sent får du förseningsavgift. Med anstånd var sista dag 2026 den 1 juni.",
+        "ar": "التأخر في التقديم يترتب عليه رسم تأخير. مع المهلة (anstånd) كان آخر يوم في 2026 هو 1 يونيو."
+      },
+      "source_url": "https://skatteverket.se/privat/deklaration/datumfordeklarationen2026.4.1997e70d1848dabbac95d72.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "skv.kvarskatt",
+      "agency": "skatteverket",
+      "name": { "en": "Pay residual tax (kvarskatt)", "sv": "Betala kvarskatt", "ar": "دفع الضريبة المتبقية" },
+      "summary": {
+        "en": "If your final tax statement (slutskattebesked) came in August 2026, the money must be on the tax account by 12 November 2026. Otherwise use the date on your statement.",
+        "sv": "Fick du slutskattebesked i augusti 2026 ska pengarna vara bokförda på skattekontot senast 12 november 2026. Annars gäller datumet på beskedet.",
+        "ar": "إذا وصلك إشعار الضريبة النهائي في أغسطس 2026 فيجب أن يُسجَّل المبلغ في حسابك الضريبي بحلول 12 نوفمبر 2026. وإلا فاستخدم التاريخ المذكور في الإشعار."
+      },
+      "inputs": [
+        { "key": "pay_by", "type": "date", "required": true, "default": "2026-11-12", "label": { "en": "Pay-by date on the slutskattebesked", "sv": "Betalas senast (enligt slutskattebeskedet)", "ar": "تاريخ الدفع (حسب الإشعار النهائي)" } }
+      ],
+      "deadlines": [
+        {
+          "key": "pay", "kind": "absolute", "severity": "high",
+          "title": { "en": "Residual tax must be booked on the tax account", "sv": "Kvarskatten ska vara bokförd på skattekontot", "ar": "يجب تسجيل الضريبة المتبقية في الحساب الضريبي" },
+          "due": { "from": "pay_by", "days": 0 },
+          "ladder": { "days": [14, 5, 2, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Interest is charged and unpaid tax can be sent to Kronofogden. Payments take a few banking days to be booked.",
+        "sv": "Ränta tas ut och obetald skatt kan lämnas till Kronofogden. Det tar några bankdagar innan en betalning bokförs.",
+        "ar": "تُحتسب فائدة وقد تُحال الضريبة غير المدفوعة إلى كرونوفوغدن. يستغرق تسجيل الدفع بضعة أيام عمل مصرفية."
+      },
+      "source_url": "https://www.skatteverket.se/kvarskatt",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "fk.report_change",
+      "agency": "forsakringskassan",
+      "name": { "en": "Report a change for housing allowance (bostadsbidrag)", "sv": "Meddela ändring för bostadsbidrag", "ar": "الإبلاغ عن تغيير لبدل السكن" },
+      "summary": {
+        "en": "Report changes in income, rent or household within 14 days of learning about them. Bostadsbidrag is reconciled later against your final income.",
+        "sv": "Meddela ändringar i inkomst, hyra eller hushåll inom 14 dagar från att du fick veta om dem. Bostadsbidraget stäms av mot slutlig inkomst.",
+        "ar": "أبلغ عن تغيّر الدخل أو الإيجار أو الأسرة خلال 14 يوماً من علمك به. يُسوّى بدل السكن لاحقاً مقابل دخلك النهائي."
+      },
+      "inputs": [
+        { "key": "change_date", "type": "date", "required": true, "label": { "en": "Date you learned about the change", "sv": "Datum då du fick veta om ändringen", "ar": "تاريخ علمك بالتغيير" } }
+      ],
+      "deadlines": [
+        {
+          "key": "report", "kind": "absolute", "severity": "high",
+          "title": { "en": "Report change to Försäkringskassan", "sv": "Meddela ändring till Försäkringskassan", "ar": "الإبلاغ عن التغيير لصندوق التأمينات" },
+          "due": { "from": "change_date", "days": 14 },
+          "ladder": { "days": [7, 2, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "You may have to pay back allowance you were not entitled to (repayment if the difference is 1,200 kr or more).",
+        "sv": "Du kan behöva betala tillbaka bidrag du inte hade rätt till (återbetalning om skillnaden är minst 1 200 kr).",
+        "ar": "قد تضطر إلى ردّ البدل الذي لم يكن من حقك (الردّ إذا كان الفرق 1200 كرونة أو أكثر)."
+      },
+      "source_url": "https://www.forsakringskassan.se/privatperson/familj-och-barn/bostadsbidrag-for-barnfamiljer/meddela-andringar-om-bostadsbidraget",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "fk.etablering_monthly",
+      "agency": "forsakringskassan",
+      "name": { "en": "Monthly claim – establishment allowance (etableringsersättning)", "sv": "Månadsansökan – etableringsersättning", "ar": "الطلب الشهري – تعويض التأسيس" },
+      "summary": {
+        "en": "Apply each month in arrears; Försäkringskassan suggests doing it on the 1st–7th. Verify the current routine on your Mina sidor.",
+        "sv": "Ansök månadsvis i efterskott; Försäkringskassan föreslår den 1:a–7:e. Kontrollera aktuell rutin på Mina sidor.",
+        "ar": "قدّم شهرياً عن الشهر الماضي؛ يقترح صندوق التأمينات الأيام 1–7. تحقّق من الإجراء الحالي في صفحاتك."
+      },
+      "inputs": [],
+      "deadlines": [
+        {
+          "key": "claim", "kind": "recurring", "severity": "normal",
+          "title": { "en": "Claim etableringsersättning for last month", "sv": "Ansök om etableringsersättning för förra månaden", "ar": "طلب تعويض التأسيس عن الشهر الماضي" },
+          "recurrence": { "freq": "monthly", "openDay": 1, "dueDay": 7 },
+          "ladder": { "atOpen": true, "days": [1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "A late claim delays your payment.",
+        "sv": "En sen ansökan försenar utbetalningen.",
+        "ar": "التأخر في الطلب يؤخّر الدفعة."
+      },
+      "source_url": "https://www.forsakringskassan.se",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "csn.annual_repayment",
+      "agency": "csn",
+      "name": { "en": "CSN annual repayment (paid once a year)", "sv": "CSN årsbelopp (betalas en gång per år)", "ar": "سداد CSN السنوي (دفعة واحدة)" },
+      "summary": {
+        "en": "If you pay your annual amount in one go it is due on the last bank day of April. Up to 12 instalments are possible; then use the dates on your invoices.",
+        "sv": "Betalar du årsbeloppet på en gång ska det vara betalt sista bankdagen i april. Upp till 12 delbetalningar är möjliga; använd då datumen på avierna.",
+        "ar": "إذا دفعت المبلغ السنوي دفعة واحدة فموعده آخر يوم عمل مصرفي في أبريل. يمكن التقسيط حتى 12 دفعة؛ عندها استخدم تواريخ الفواتير."
+      },
+      "inputs": [
+        { "key": "year", "type": "year", "required": true, "default": "nextAprilYear", "label": { "en": "Year", "sv": "År", "ar": "السنة" } }
+      ],
+      "deadlines": [
+        {
+          "key": "pay", "kind": "absolute", "severity": "high",
+          "title": { "en": "Pay CSN annual amount", "sv": "Betala årsbeloppet till CSN", "ar": "دفع المبلغ السنوي لـ CSN" },
+          "due": { "lastBankDayOfMonth": 4, "yearInput": "year" },
+          "ladder": { "days": [14, 3, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Late payment gives a reminder fee and the debt can be sent to Kronofogden.",
+        "sv": "Sen betalning ger påminnelseavgift och skulden kan lämnas till Kronofogden.",
+        "ar": "التأخر يترتب عليه رسم تذكير وقد يُحال الدين إلى كرونوفوغدن."
+      },
+      "source_url": "https://www.csn.se/fragor-och-svar/har-du-fatt-ett-slutligt-arsbelopp-som-ska-betalas-under-2026.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "csn.reclaim",
+      "agency": "csn",
+      "name": { "en": "CSN reclaim after income check (fribelopp)", "sv": "CSN återkrav efter inkomstprövning (fribelopp)", "ar": "مطالبة CSN بالاسترداد بعد فحص الدخل" },
+      "summary": {
+        "en": "CSN checks your income against Skatteverket afterwards and may reclaim money; you normally have 30 days to pay. Use the date in the decision if it differs.",
+        "sv": "CSN kontrollerar inkomsten mot Skatteverket i efterhand och kan kräva tillbaka pengar; normalt har du 30 dagar att betala. Använd datumet i beslutet om det skiljer sig.",
+        "ar": "تتحقق CSN لاحقاً من دخلك مع مصلحة الضرائب وقد تطالب باسترداد المال؛ عادة لديك 30 يوماً للدفع. استخدم التاريخ في القرار إن اختلف."
+      },
+      "inputs": [
+        { "key": "decision_date", "type": "date", "required": true, "label": { "en": "Decision date", "sv": "Beslutsdatum", "ar": "تاريخ القرار" } }
+      ],
+      "deadlines": [
+        {
+          "key": "pay", "kind": "absolute", "severity": "high",
+          "title": { "en": "Pay CSN reclaim", "sv": "Betala CSN:s återkrav", "ar": "دفع مبلغ الاسترداد لـ CSN" },
+          "due": { "from": "decision_date", "days": 30 },
+          "ladder": { "days": [14, 7, 2, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Unpaid amounts can be sent to Kronofogden.",
+        "sv": "Obetalda belopp kan lämnas till Kronofogden.",
+        "ar": "قد تُحال المبالغ غير المدفوعة إلى كرونوفوغدن."
+      },
+      "source_url": "https://www.csn.se/fragor-och-svar/hur-stor-inkomst-far-jag-ha-nar-jag-studerar-med-studiemedel/inkomst-och-fribelopp.html",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "bf.queue_fee",
+      "agency": "bostadsformedlingen",
+      "name": { "en": "Stockholm housing queue yearly fee", "sv": "Bostadskö Stockholm – årsavgift", "ar": "رسوم طابور السكن السنوية في ستوكهولم" },
+      "summary": {
+        "en": "200 kr per year at the same time each year. You get an email and then 30 days to pay (Swish or card). No advance payment.",
+        "sv": "200 kr per år vid samma tid varje år. Du får e-post och sedan 30 dagar att betala (Swish eller kort). Det går inte att betala i förväg.",
+        "ar": "200 كرونة سنوياً في الوقت نفسه من كل عام. تصلك رسالة بريد ثم 30 يوماً للدفع (سويش أو بطاقة). لا يمكن الدفع مسبقاً."
+      },
+      "inputs": [
+        { "key": "notice_date", "type": "date", "required": true, "label": { "en": "Date of the fee email", "sv": "Datum för avgiftsmejlet", "ar": "تاريخ رسالة الرسوم" } }
+      ],
+      "deadlines": [
+        {
+          "key": "pay", "kind": "absolute", "severity": "high",
+          "title": { "en": "Pay housing-queue fee (200 kr)", "sv": "Betala köavgiften (200 kr)", "ar": "دفع رسوم طابور السكن (200 كرونة)" },
+          "due": { "from": "notice_date", "days": 30 },
+          "ladder": { "days": [14, 7, 2, 0] }
+        },
+        {
+          "key": "dereg", "kind": "absolute", "severity": "critical",
+          "title": { "en": "Queue deregistered if still unpaid (queue time lost)", "sv": "Avregistreras från kön om ej betalt (kötiden förloras)", "ar": "الشطب من الطابور إذا لم تُدفع (تضيع مدة الانتظار)" },
+          "due": { "from": "notice_date", "days": 30, "then": { "months": 5 } },
+          "ladder": { "days": [30, 7, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "After the invoice due date the queue becomes 'vilande' (you cannot register interest). Five months after the due date you are deregistered and lose your queue time.",
+        "sv": "Efter förfallodagen blir kön vilande (du kan inte anmäla intresse). Fem månader efter förfallodagen avregistreras du och förlorar kötiden.",
+        "ar": "بعد تاريخ الاستحقاق يصبح التسجيل «خاملاً» (لا يمكنك إبداء الاهتمام). بعد خمسة أشهر من الاستحقاق تُشطب وتخسر مدة الانتظار."
+      },
+      "source_url": "https://bostad.stockholm.se/sa-gar-det-till/regler/avgift/",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "kfm.betalningsforelaggande",
+      "agency": "kronofogden",
+      "name": { "en": "Payment order (betalningsföreläggande) – respond", "sv": "Betalningsföreläggande – svara/bestrid", "ar": "أمر الدفع – الرد أو الاعتراض" },
+      "summary": {
+        "en": "Confirm receipt. If you disagree, object in writing within the time stated in the letter (usually 10 days). Object even if you have already paid.",
+        "sv": "Bekräfta att du tagit emot. Om du inte håller med ska du bestrida skriftligt inom tiden i brevet (oftast 10 dagar). Bestrid även om du redan har betalat.",
+        "ar": "أكّد الاستلام. إذا لم توافق فاعترض كتابياً خلال المدة المذكورة في الرسالة (عادة 10 أيام). اعترض حتى لو كنت قد دفعت."
+      },
+      "inputs": [
+        { "key": "served_date", "type": "date", "required": true, "default": "today", "label": { "en": "Date you received it (delgivning)", "sv": "Datum du tog emot det (delgivning)", "ar": "تاريخ الاستلام (التبليغ)" } },
+        { "key": "response_days", "type": "number", "required": true, "default": 10, "min": 1, "max": 14, "label": { "en": "Days to respond (as stated in the letter)", "sv": "Dagar att svara (enligt brevet)", "ar": "أيام الرد (كما في الرسالة)" } }
+      ],
+      "deadlines": [
+        {
+          "key": "respond", "kind": "relative", "severity": "critical",
+          "title": { "en": "Object to Kronofogden payment order", "sv": "Bestrid betalningsföreläggandet hos Kronofogden", "ar": "الاعتراض على أمر الدفع لدى كرونوفوغدن" },
+          "due": { "from": "served_date", "daysFromInput": "response_days" },
+          "ladder": { "days": [7, 3, 1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "If you do not respond in time Kronofogden can issue a judgment (utslag) that the debt must be paid – it can lead to enforcement and a payment remark.",
+        "sv": "Svarar du inte i tid kan Kronofogden meddela utslag om att skulden ska betalas – det kan leda till utmätning och betalningsanmärkning.",
+        "ar": "إذا لم ترد في الوقت المحدد قد يصدر كرونوفوغدن حكماً (utslag) بوجوب الدفع، وقد يؤدي ذلك إلى الحجز وتسجيل ملاحظة دفع سلبية."
+      },
+      "source_url": "https://kronofogden.se/kontakta-oss/fragor-och-svar",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "kfm.atervinning",
+      "agency": "kronofogden",
+      "name": { "en": "Judgment (utslag) – apply for återvinning", "sv": "Utslag – ansök om återvinning", "ar": "الحكم (utslag) – طلب إعادة النظر" },
+      "summary": {
+        "en": "You can apply for återvinning (reopening) within 1 month from the date of the utslag.",
+        "sv": "Du kan ansöka om återvinning inom en månad från dagen för utslaget.",
+        "ar": "يمكنك طلب إعادة النظر (återvinning) خلال شهر من تاريخ الحكم."
+      },
+      "inputs": [
+        { "key": "utslag_date", "type": "date", "required": true, "label": { "en": "Date of the utslag", "sv": "Utslagets datum", "ar": "تاريخ الحكم" } }
+      ],
+      "deadlines": [
+        {
+          "key": "apply", "kind": "relative", "severity": "critical",
+          "title": { "en": "Apply for återvinning", "sv": "Ansök om återvinning", "ar": "تقديم طلب إعادة النظر" },
+          "due": { "from": "utslag_date", "months": 1 },
+          "ladder": { "days": [14, 7, 3, 1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "After the deadline the judgment stands and can be enforced.",
+        "sv": "Efter fristen står utslaget fast och kan verkställas.",
+        "ar": "بعد انقضاء المهلة يصبح الحكم نهائياً ويمكن تنفيذه."
+      },
+      "source_url": "https://lagen.se/sfs/1990_746.xhtml",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "ts.foreign_licence",
+      "agency": "transportstyrelsen",
+      "name": { "en": "Foreign (non-EEA) driving licence stops being valid", "sv": "Utländskt körkort (utanför EES) slutar gälla", "ar": "انتهاء صلاحية رخصة القيادة الأجنبية (خارج المنطقة الاقتصادية الأوروبية)" },
+      "summary": {
+        "en": "A non-EEA licence is valid in Sweden only until 1 year after you were registered (folkbokförd). Only UK, Faroe, Swiss and Japanese licences can be exchanged; others need a Swedish licence.",
+        "sv": "Ett körkort från land utanför EES gäller i Sverige bara till ett år efter folkbokföringen. Endast körkort från Storbritannien, Färöarna, Schweiz och Japan kan bytas; övriga behöver svenskt körkort.",
+        "ar": "رخصة القيادة من خارج المنطقة الاقتصادية الأوروبية صالحة في السويد حتى سنة بعد التسجيل في السجل السكاني فقط. يمكن استبدال رخص بريطانيا وجزر فارو وسويسرا واليابان فقط؛ والبقية تحتاج رخصة سويدية."
+      },
+      "inputs": [
+        { "key": "folkbokford", "type": "date", "required": true, "label": { "en": "Date you were folkbokförd", "sv": "Folkbokföringsdatum", "ar": "تاريخ التسجيل السكاني" } }
+      ],
+      "deadlines": [
+        {
+          "key": "expires", "kind": "absolute", "severity": "high",
+          "title": { "en": "Foreign licence no longer valid in Sweden", "sv": "Utländska körkortet slutar gälla i Sverige", "ar": "الرخصة الأجنبية لم تعد صالحة في السويد" },
+          "due": { "from": "folkbokford", "years": 1 },
+          "ladder": { "days": [120, 60, 30, 7, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Driving after that date with only the foreign licence counts as driving without a valid licence.",
+        "sv": "Att köra efter det datumet med bara det utländska körkortet räknas som olovlig körning.",
+        "ar": "القيادة بعد هذا التاريخ بالرخصة الأجنبية فقط تُعد قيادة بدون رخصة صالحة."
+      },
+      "source_url": "https://www.transportstyrelsen.se/sv/vagtrafik/korkort/har-korkort/utlandska-korkort/",
+      "source_tag": "S",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "1177.appointment",
+      "agency": "1177",
+      "name": { "en": "Healthcare appointment (kallelse)", "sv": "Vårdbesök (kallelse)", "ar": "موعد طبي (استدعاء)" },
+      "summary": {
+        "en": "Appointment from a kallelse. Cancel in time if you cannot come (late cancellations may cost a fee) and book an interpreter if needed.",
+        "sv": "Besök enligt kallelse. Avboka i tid om du inte kan komma (sen avbokning kan kosta) och boka tolk vid behov.",
+        "ar": "موعد حسب الاستدعاء. ألغِ مبكراً إن لم تستطع الحضور (قد يكلّف الإلغاء المتأخر رسوماً) واحجز مترجماً عند الحاجة."
+      },
+      "inputs": [
+        { "key": "appointment", "type": "date", "required": true, "label": { "en": "Appointment date", "sv": "Datum för besöket", "ar": "تاريخ الموعد" } }
+      ],
+      "deadlines": [
+        {
+          "key": "visit", "kind": "absolute", "severity": "normal",
+          "title": { "en": "Healthcare appointment", "sv": "Vårdbesök", "ar": "موعد طبي" },
+          "due": { "from": "appointment" },
+          "ladder": { "days": [7, 1, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "Missed appointments are often charged and you may have to wait for a new time.",
+        "sv": "Uteblivna besök debiteras ofta och du kan få vänta på en ny tid.",
+        "ar": "غالباً ما تُفرض رسوم على المواعيد الفائتة وقد تنتظر موعداً جديداً."
+      },
+      "source_url": "https://www.1177.se",
+      "source_tag": "GK",
+      "verified_at": "2026-10-19"
+    },
+    {
+      "id": "1177.prescription",
+      "agency": "1177",
+      "name": { "en": "Prescription renewal", "sv": "Förnya recept", "ar": "تجديد الوصفة الطبية" },
+      "summary": {
+        "en": "Renew a prescription before it runs out; renewal through 1177 can take several working days.",
+        "sv": "Förnya receptet innan det tar slut; förnyelse via 1177 kan ta flera arbetsdagar.",
+        "ar": "جدّد الوصفة قبل نفادها؛ قد يستغرق التجديد عبر 1177 عدة أيام عمل."
+      },
+      "inputs": [
+        { "key": "runs_out", "type": "date", "required": true, "label": { "en": "Prescription runs out / expires", "sv": "Receptet tar slut / går ut", "ar": "تاريخ نفاد/انتهاء الوصفة" } }
+      ],
+      "deadlines": [
+        {
+          "key": "renew", "kind": "absolute", "severity": "normal",
+          "title": { "en": "Request prescription renewal", "sv": "Begär förnyat recept", "ar": "طلب تجديد الوصفة" },
+          "due": { "from": "runs_out", "days": -10 },
+          "ladder": { "days": [7, 0] }
+        }
+      ],
+      "consequence": {
+        "en": "You may run out of medicine.",
+        "sv": "Medicinen kan ta slut.",
+        "ar": "قد ينفد الدواء."
+      },
+      "source_url": "https://www.1177.se/fragor--svar/e-tjanster/fragor-om-ombud/",
+      "source_tag": "GK",
+      "verified_at": "2026-10-19"
+    }
+  ]
+}

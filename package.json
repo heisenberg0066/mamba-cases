@@ -1,0 +1,31 @@
+{
+  "name": "mamba-cases",
+  "productName": "Mamba Cases",
+  "version": "0.1.0",
+  "description": "Offline, private tracker for your cases and deadlines with Swedish authorities (EN/SV/AR)",
+  "author": "Ammar",
+  "license": "MIT",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/run-tests.js",
+    "test:ui": "bash test/run-ui.sh",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heisenberg0066/mamba-cases.git"
+  },
+  "dependencies": {
+    "@tesseract.js-data/ara": "^1.0.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/swe": "^1.0.0",
+    "pdfjs-dist": "^4.10.38",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "resedit": "^2.0.3"
+  }
+}
