@@ -1,0 +1,113 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests (calendar, rules engine, extraction, vault, backup, ICS, local OCR)
+        shell: pwsh
+        run: |
+          $env:OCR = '1'
+          node test/run-tests.js
+
+      - name: Build installer, portable and zip
+        run: npx electron-builder --win --x64 --publish never
+
+      - name: Self-test of the packaged app (--self-test)
+        shell: pwsh
+        run: |
+          $env:MAMBA_CASES_DATA = "$env:RUNNER_TEMP\mc-selftest"
+          $env:MAMBA_SMOKE = "$env:RUNNER_TEMP\mc-smoke"
+          $p = Start-Process -FilePath "dist\win-unpacked\Mamba Cases.exe" -ArgumentList '--self-test' -PassThru
+          if (!$p.WaitForExit(180000)) { $p.Kill(); throw 'self-test timed out' }
+          Get-Content "$env:MAMBA_SMOKE\mamba-selftest.txt"
+          if ($p.ExitCode -ne 0) { throw "self-test failed ($($p.ExitCode))" }
+
+      - name: UI test of the packaged app (screenshots)
+        shell: pwsh
+        run: |
+          $env:MAMBA_CASES_DATA = "$env:RUNNER_TEMP\mc-uitest"
+          $env:MAMBA_CASES_UITEST = "$PWD\test\ui.js"
+          $env:MAMBA_CASES_FIXTURES = "$PWD\test\fixtures"
+          $env:MAMBA_CASES_SHOTS = "$PWD\shots"
+          $env:MAMBA_CASES_EXPORT_DIR = "$env:RUNNER_TEMP\mc-export"
+          $env:MAMBA_CASES_FAKE_TODAY = '2026-10-19'
+          $env:MAMBA_CASES_REPORT = "$env:RUNNER_TEMP\ui-report.txt"
+          New-Item -ItemType Directory -Force $env:MAMBA_CASES_EXPORT_DIR | Out-Null
+          $p = Start-Process -FilePath "dist\win-unpacked\Mamba Cases.exe" -PassThru
+          if (!$p.WaitForExit(300000)) { $p.Kill(); throw 'UI test timed out' }
+          Get-Content $env:MAMBA_CASES_REPORT
+          if ($p.ExitCode -ne 0) { throw "UI test failed ($($p.ExitCode))" }
+          Get-ChildItem $env:MAMBA_CASES_EXPORT_DIR
+
+      - name: Install silently and uninstall
+        shell: pwsh
+        run: |
+          Get-Process 'Mamba Cases' -ErrorAction SilentlyContinue | Stop-Process -Force
+          $setup = Get-ChildItem dist\MambaCases-Setup-*.exe | Select-Object -First 1
+          $exe = "$env:LOCALAPPDATA\Programs\Mamba Cases\Mamba Cases.exe"
+          for ($try = 1; $try -le 3 -and !(Test-Path $exe); $try++) {
+            $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait -PassThru
+            Write-Host "Setup exit code: $($p.ExitCode) (attempt $try)"
+            for ($i = 0; $i -lt 60 -and !(Test-Path $exe); $i++) { Start-Sleep 1 }
+          }
+          if (!(Test-Path $exe)) { throw "not installed at $exe" }
+          Write-Host "Installed: $exe"
+          $env:MAMBA_SMOKE = "$env:RUNNER_TEMP\mc-smoke-installed"
+          $env:MAMBA_CASES_DATA = "$env:RUNNER_TEMP\mc-selftest-installed"
+          $p = Start-Process -FilePath $exe -ArgumentList '--self-test' -PassThru
+          if (!$p.WaitForExit(180000)) { $p.Kill(); throw 'installed self-test timed out' }
+          Get-Content "$env:MAMBA_SMOKE\mamba-selftest.txt"
+          if ($p.ExitCode -ne 0) { throw "installed self-test failed ($($p.ExitCode))" }
+          Start-Process -FilePath "$env:LOCALAPPDATA\Programs\Mamba Cases\Uninstall Mamba Cases.exe" -ArgumentList '/S' -Wait
+          for ($i = 0; $i -lt 60 -and (Test-Path $exe); $i++) { Start-Sleep 1 }
+          if (Test-Path $exe) { throw 'uninstall left the exe behind' }
+          Write-Host 'Uninstalled.'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mamba-cases-windows
+          path: |
+            dist/MambaCases-Setup-*.exe
+            dist/MambaCases-Portable-*.exe
+            dist/MambaCases-*-win-x64.zip
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-screenshots-windows
+          path: shots/
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Mamba Cases ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            dist/MambaCases-Setup-*.exe
+            dist/MambaCases-Portable-*.exe
+            dist/MambaCases-*-win-x64.zip
