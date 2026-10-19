@@ -24,8 +24,8 @@
       if (e.categories) L.push('CATEGORIES:' + esc(e.categories));
       for (const d of e.alarms || []) {
         // all-day event starts 00:00; fire at 09:00 local on the reminder day → -(d days) + 9h
-        const trig = d === 0 ? 'PT9H' : `-P${d - 1}DT15H`;
-        L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(e.title), 'TRIGGER:' + (d === 0 ? trig : trig), 'END:VALARM');
+        const trig = d === 0 ? 'PT9H' : d === 1 ? '-PT15H' : `-P${d - 1}DT15H`;
+        L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(e.title), 'TRIGGER:' + trig, 'END:VALARM');
       }
       L.push('END:VEVENT');
     }

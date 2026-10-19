@@ -10,22 +10,119 @@
     "start": "electron .",
     "test": "node test/run-tests.js",
     "test:ui": "bash test/run-ui.sh",
-    "dist": "electron-builder --win --x64 --publish never"
+    "dist": "electron-builder --win --x64 --publish never",
+    "test:all": "OCR=1 node test/run-tests.js && bash test/run-ui.sh"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/heisenberg0066/mamba-cases.git"
   },
   "dependencies": {
-    "@tesseract.js-data/ara": "^1.0.0",
-    "@tesseract.js-data/eng": "^1.0.0",
-    "@tesseract.js-data/swe": "^1.0.0",
     "pdfjs-dist": "^4.10.38",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "electron": "^33.4.11",
     "electron-builder": "^25.1.8",
-    "resedit": "^2.0.3"
+    "resedit": "^2.0.3",
+    "@tesseract.js-data/ara": "^1.0.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/swe": "^1.0.0"
+  },
+  "build": {
+    "appId": "com.ammar.mambacases",
+    "productName": "Mamba Cases",
+    "copyright": "Free for personal use",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**",
+      "build/icon.png",
+      "package.json",
+      "!**/*.map",
+      "!**/*.d.ts",
+      "!**/*.d.mts",
+      "!node_modules/resedit/**",
+      "!node_modules/@napi-rs/**",
+      "!node_modules/pdfjs-dist/legacy/**",
+      "!node_modules/pdfjs-dist/web/**",
+      "!node_modules/pdfjs-dist/image_decoders/**",
+      "!node_modules/pdfjs-dist/types/**",
+      "!node_modules/@tesseract.js-data/**"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/tesseract.js/**",
+      "**/node_modules/tesseract.js-core/**",
+      "node_modules/bmp-js/**",
+      "node_modules/is-url/**",
+      "node_modules/node-fetch/**",
+      "node_modules/regenerator-runtime/**",
+      "node_modules/wasm-feature-detect/**",
+      "node_modules/zlibjs/**",
+      "node_modules/idb-keyval/**",
+      "node_modules/whatwg-url/**",
+      "node_modules/tr46/**",
+      "node_modules/webidl-conversions/**",
+      "node_modules/encoding/**",
+      "node_modules/iconv-lite/**",
+      "node_modules/safer-buffer/**"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/tessdata",
+        "to": "tessdata"
+      },
+      {
+        "from": "assets/selftest",
+        "to": "selftest"
+      }
+    ],
+    "npmRebuild": false,
+    "afterPack": "build/afterPack.js",
+    "artifactName": "MambaCases-${version}-win-${arch}.${ext}",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Mamba Cases",
+      "include": "build/installer.nsh",
+      "artifactName": "MambaCases-Setup-${version}-x64.${ext}",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "MambaCases-Portable-${version}-x64.${ext}"
+    }
   }
 }

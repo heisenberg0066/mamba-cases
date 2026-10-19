@@ -120,7 +120,7 @@ app.on('window-all-closed', () => { if (!tray || quitting) app.quit(); });
 function registerIpc() {
   const GUARDED = /^(doc:|backup:|vault:save|vault:changePin|reminders:)/;
   const H = (ch, fn) => ipcMain.handle(ch, async (_e, ...a) => { if (GUARDED.test(ch) && uiLocked) throw new Error('locked'); return fn(...a); });
-  H('app:info', () => ({ version: app.getVersion(), packVersion: PACK.version, platform: process.platform, keystore: keystore.available(), dataDir: dataDir(), test: !!UITEST }));
+  H('app:info', () => ({ version: app.getVersion(), packVersion: PACK.version, platform: process.platform, keystore: keystore.available(), dataDir: dataDir(), test: !!UITEST, fakeToday: UITEST ? process.env.MAMBA_CASES_FAKE_TODAY || null : null }));
   H('settings:get', () => settings());
   H('settings:set', (patch) => {
     const s = { ...settings(), ...patch }; saveSettings(s);
@@ -203,7 +203,7 @@ function registerIpc() {
     H('test:fixture', (name) => path.join(__dirname, '..', 'test', 'fixtures', name));
     H('test:tick', (iso) => tickReminders(new Date(iso)));
     H('test:done', (code, report) => { console.log(report || ''); setTimeout(() => app.exit(code || 0), 200); });
-    H('test:size', (w, h) => { win.setSize(w, h); return true; });
+    H('test:size', (w, h) => { win.setContentSize(w, h); return { bounds: win.getBounds(), scale: require('electron').screen.getPrimaryDisplay().scaleFactor, size: require('electron').screen.getPrimaryDisplay().size }; });
   }
 }
 function storeBuffer(buf, name) {
@@ -216,7 +216,7 @@ function storeBuffer(buf, name) {
 
 app.whenReady().then(async () => {
   vault = new Vault(dataDir(), keystore);
-  if (SELFTEST) { const code = await require('./selftest').run({ app, Vault, makeBackup, readBackup, keystore }); app.exit(code); return; }
+  if (SELFTEST) { const code = await require('./selftest').run({ app, Vault, makeBackup, readBackup, keystore, registerIpc, BrowserWindow }); app.exit(code); return; }
   registerIpc(); createWindow(); createTray();
   powerMonitor.on('lock-screen', () => { if (win) win.webContents.send('lock-now'); });
   powerMonitor.on('suspend', () => { if (win) win.webContents.send('lock-now'); });

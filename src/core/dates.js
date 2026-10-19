@@ -30,7 +30,9 @@
   const weekday = (s) => parse(s).getUTCDay(); // 0 = Sunday
   const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / 86400000); // b - a
   /** Today's date in Europe/Stockholm. */
+  const fake = () => { try { if (typeof self !== 'undefined' && self.__MC_FAKE_TODAY) return self.__MC_FAKE_TODAY; if (typeof process !== 'undefined' && process.env && process.env.MAMBA_CASES_FAKE_TODAY) return process.env.MAMBA_CASES_FAKE_TODAY; } catch (_) {} return null; };
   const today = (now) => {
+    if (!now && fake()) return fake();
     const d = now ? new Date(now) : new Date();
     try {
       const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);

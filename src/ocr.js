@@ -19,7 +19,7 @@ async function getWorker(langs) {
   if (workers.has(key)) return workers.get(key);
   const T = require('tesseract.js');
   const tjsDir = path.dirname(require.resolve('tesseract.js/package.json'));
-  const coreDir = path.dirname(require.resolve('tesseract.js-core/package.json'));
+  const coreDir = path.dirname(require.resolve('tesseract.js-core/package.json', { paths: [tjsDir] }));
   const p = T.createWorker(langs, T.OEM.LSTM_ONLY, {
     langPath: assetsDir(), cacheMethod: 'none', gzip: true,
     workerPath: unpacked(path.join(tjsDir, 'src', 'worker-script', 'node', 'index.js')),

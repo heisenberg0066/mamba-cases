@@ -46,7 +46,7 @@
   ];
   const ROLE_CUES = [
     { role: 'due', re: /(senast|sista\s+(?:dag|dagen)|förfallo(?:dag|datum)|betalas\s+senast|ska\s+vara\s+(?:bokförd|betald|inkommen)|svara\s+senast|due(?:\s+date)?|deadline|no\s+later\s+than|by|بحلول|آخر\s+موعد|في\s+موعد\s+أقصاه|قبل)\s*[:.]?\s*(?:den\s+|the\s+)?$/i },
-    { role: 'expiry', re: /(giltig[t]?\s+(?:till|t\.?\s?o\.?\s?m\.?)|gäller\s+(?:till|t\.?\s?o\.?\s?m\.?)|t\.?\s?o\.?\s?m\.?|tillståndet\s+gäller\s+till|valid\s+(?:until|to|through)|expir(?:es|y|y\s+date)|utgångsdatum|صالح\s+حتى|تاريخ\s+الانتهاء|ينتهي\s+في)\s*[:.]?\s*(?:den\s+)?$/i },
+    { role: 'expiry', re: /(giltig[t]?\s+(?:till|t\.?\s?o\.?\s?m\.?)|till\s+och\s+med|gäller\s+(?:till|t\.?\s?o\.?\s?m\.?)|t\.?\s?o\.?\s?m\.?|tillståndet\s+gäller\s+till|valid\s+(?:until|to|through)|expir(?:es|y|y\s+date)|utgångsdatum|صالح\s+حتى|تاريخ\s+الانتهاء|ينتهي\s+في)\s*[:.]?\s*(?:den\s+)?$/i },
     { role: 'start', re: /(från\s+och\s+med|fr\.?\s?o\.?\s?m\.?|gäller\s+från|valid\s+from|من\s+تاريخ|اعتباراً\s+من)\s*[:.]?\s*(?:den\s+)?$/i },
     { role: 'appointment', re: /(besöks?tid|tid\s*:|datum\s+för\s+besöket|välkommen\s+(?:den|på)|appointment|موعدك|الموعد)\s*[:.]?\s*(?:den\s+)?$/i },
     { role: 'letter', re: /(datum|daterad|beslutsdatum|beslut\s+den|utfärdat|skickat|date|التاريخ)\s*[:.]?\s*(?:den\s+)?$/i },
