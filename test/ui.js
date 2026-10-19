@@ -142,7 +142,7 @@ ok('unlock restores encrypted data', S.data.cases.length >= 6 && S.data.document
 
 // restore from backup (roundtrip): delete a case, restore, check it is back
 const before = S.data.cases.length; S.data.cases.pop(); await window.MC.flush();
-const bk = await window.api.test.fixture('../../tmp-export/' + 'MambaCases-backup-' + window.MCDates.today() + '.mcbak');
+const bk = await window.api.test.fixture('export:' + 'MambaCases-backup-' + window.MCDates.today() + '.mcbak');
 window.MC.restoreDlg(bk); await click('.mback [data-k=yes]'); await type('#rst1', 'correct horse battery'); await click('.mback [data-k=ok]'); await sleep(2500);
 ok('backup restore roundtrip', S.data.cases.length === before, `${S.data.cases.length}/${before}`);
 

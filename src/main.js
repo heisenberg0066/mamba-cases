@@ -200,7 +200,7 @@ function registerIpc() {
   H('reminders:preview', (iso) => dueReminders(iso ? new Date(iso) : new Date()).map((r) => ({ id: r.dl.id, kind: r.kind, days: r.days })));
   if (UITEST) {
     H('test:shot', async (name) => { const dir = process.env.MAMBA_CASES_SHOTS || 'docs'; fs.mkdirSync(dir, { recursive: true }); const img = await win.webContents.capturePage(); fs.writeFileSync(path.join(dir, name + '.png'), img.toPNG()); return true; });
-    H('test:fixture', (name) => path.join(process.env.MAMBA_CASES_FIXTURES || path.join(__dirname, '..', 'test', 'fixtures'), name));
+    H('test:fixture', (name) => name.startsWith('export:') ? path.join(process.env.MAMBA_CASES_EXPORT_DIR || 'tmp-export', name.slice(7)) : path.join(process.env.MAMBA_CASES_FIXTURES || path.join(__dirname, '..', 'test', 'fixtures'), name));
     H('test:tick', (iso) => tickReminders(new Date(iso)));
     H('test:done', (code, report) => { console.log(report || ''); if (process.env.MAMBA_CASES_REPORT) { try { fs.writeFileSync(process.env.MAMBA_CASES_REPORT, String(report || '') + `\nexit ${code || 0}\n`); } catch (_) {} } setTimeout(() => app.exit(code || 0), 200); });
     H('test:size', (w, h) => { win.setContentSize(w, h); return { bounds: win.getBounds(), scale: require('electron').screen.getPrimaryDisplay().scaleFactor, size: require('electron').screen.getPrimaryDisplay().size }; });
